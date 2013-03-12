@@ -1,0 +1,21 @@
+
+a {
+	color: green;
+}
+
+a.premium {
+	color: yellow;
+}
+
+#content {
+	border: 1px solid red;
+}
+
+#content p {
+	font-size: 10pt;
+}
+
+#content div.ad {
+	display: none;
+}
+
