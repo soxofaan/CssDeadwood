@@ -280,7 +280,13 @@ class CssDeadwoodApp(object):
         # Report
         for css_file, data in results.items():
             print (css_file + ' ').ljust(80, '-')
-            print 'Could not determine usage of the following CSS selectors:'
+            total_count = len(data['selectors'])
+            if total_count == 0:
+                print 'No selectors'
+                continue
+            unused_count = len(data['unused_selectors'])
+            perc = 100.0 * unused_count / total_count
+            print 'Could not determine usage of the following %d CSS selectors (from %d in total: %.2f%%):' % (unused_count, total_count, perc)
             print '\n'.join(data['unused_selectors'])
 
         # TODO: HTML report
