@@ -10,7 +10,6 @@ import json
 import pprint
 
 import bs4
-import cssutils
 
 
 # TODO: instead of used vs not used, provide histogram analysis to have better view on hot vs not hot
@@ -54,14 +53,29 @@ def extract_css_selectors(css_file):
     '''
     Extract CSS selectors from a given CSS file.
 
+    @param css_file CSS file path
+
     @return set of CSS selectors
     '''
     selectors = set()
-    # TODO: implement custom/faster selector extraction
-    stylesheet = cssutils.parseFile(css_file)
-    for rule in stylesheet.cssRules:
-        if isinstance(rule, cssutils.css.CSSStyleRule):
-            selectors.update([s.selectorText for s in rule.selectorList])
+    css = file_get_contents(css_file)
+    # Precompiled regex to clean up/normalize whitespace
+    whitespace_regex = re.compile(r'\s+', flags=re.DOTALL)
+    # Remove comments.
+    css = re.compile(r'/\*.*?\*/', flags=re.DOTALL).sub('', css)
+    # Collect the selectors/selector groups in front of { ... } declaration blocks
+    for match in re.compile(r'\s*([^{}]*)\s*{', flags=re.DOTALL).finditer(css):
+        selector_part = match.group(1).strip()
+        # Ignore at-rules
+        if selector_part.startswith('@'):
+            continue
+        # Split on comma to get selectors.
+        for selector_candidate in selector_part.split(','):
+            # Clean up/normalize whitespace
+            selector_candidate = whitespace_regex.sub(' ', selector_candidate.strip())
+            # Store
+            selectors.add(selector_candidate)
+
     return selectors
 
 
