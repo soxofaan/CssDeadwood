@@ -235,7 +235,12 @@ class CssDeadwoodApp(object):
     def main(self, argv=sys.argv):
 
         # Parse command line
-        option_parser = optparse.OptionParser(usage='%prog [options]')
+        option_parser = optparse.OptionParser(usage='%prog [options] [cssfiles] [htmlfiles] [srcsfiles]')
+
+        default_src_extensions = '.php,.py,.rb,.js'
+        option_parser.add_option("-e", "--srcext", metavar='EXT',
+                      action="store", dest="src_extensions", default=default_src_extensions,
+                      help="Define the source file extensions (comma separated) to filter on when recursively scanning source folders. Default: '%s'." % default_src_extensions)
 
         option_parser.add_option("--htmlexport", metavar='FILE',
                       action="store", dest="html_export", default=None,
@@ -256,8 +261,11 @@ class CssDeadwoodApp(object):
         # Get CSS, HTML and other source files form given arguments.
         css_files = collect_files(args, extensions=['.css'])
         html_files = collect_files(args, extensions=['.html'])
-        # TODO: provide option to set the list of extensions for other source files
-        src_files = collect_files(args, extensions=['.php', '.py', '.rb', '.js'])
+        if len(options.src_extensions.strip()) > 0:
+            src_extensions = options.src_extensions.split(',')
+        else:
+            src_extensions = []
+        src_files = collect_files(args, extensions=src_extensions)
         _log.info('Working with %d CSS files.' % len(css_files))
         _log.debug('CSS files: %r.' % css_files)
         _log.info('Working with %d HTML files.' % len(html_files))
