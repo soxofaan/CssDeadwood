@@ -11,7 +11,10 @@ import optparse
 import json
 import pprint
 
-import bs4
+import lxml
+import lxml.etree
+import lxml.cssselect
+import cssselect
 
 
 # TODO: instead of used vs not used, provide histogram analysis to have better view on hot vs not hot
@@ -99,48 +102,54 @@ def get_occuring_words(words, content):
 
 
 
-def match_selectors_against_html(selectors, html):
+def match_selectors_against_html_root_element(selectors, html_element):
     '''
-    Try the given set of CSS selectors on the DOM from the given HTML
-    and return the subset of selectors that did match.
+    Find the selectors that match with the DOM from the given HTML.
 
     @param selectors set of CSS selectors
-    @param html html string or file like object, containing html data
+    @param html_element lxml.etree.Element object
 
     @return set of found selectors
     '''
-    logger = logging.getLogger('CssDeadwood.bs4')
-    # TODO: (from http://www.crummy.com/software/BeautifulSoup/bs4/doc/)
-    # if CSS selectors are all you need, you might as well use lxml directly, because it's faster.
-    soup = bs4.BeautifulSoup(html)
-
     found_selectors = set()
+    css_to_xpath_translator = cssselect.HTMLTranslator()
     for selector in selectors:
         try:
-            if len(soup.select(selector)) > 0:
+            xpath_expr = css_to_xpath_translator.css_to_xpath(selector)
+            if len(html_element.xpath(xpath_expr)) > 0:
                 found_selectors.add(selector)
-        except IndexError:
-            # This often happens with overspecified id selectors
-            # see https://bugs.launchpad.net/beautifulsoup/+bug/1168167
-            logger.warning('BeautifulSoup select failed with IndexError on selector %r' % selector)
         except Exception:
-            logger.exception('BeautifulSoup select failed on selector %r' % selector)
+            logging.exception('lxml css select failed on selector %r' % selector)
     return found_selectors
 
 
-def match_selectors_against_html_file(selectors, html_file):
+def match_selectors_against_html_string(selectors, html_string):
     '''
-    Try the given set of CSS selectors on the DOM from the given HTML
-    and return the subset of selectors that did match.
+    Find the selectors that match with the DOM from the given HTML.
 
     @param selectors set of CSS selectors
-    @param html_file path to HTML file.
+    @param html_string html string
 
     @return set of found selectors
     '''
-    with open(html_file) as f:
-        found_selectors = match_selectors_against_html(selectors, f)
-    return found_selectors
+    parser = lxml.etree.HTMLParser()
+    html_element = lxml.etree.fromstring(html_string, parser=parser)
+    return match_selectors_against_html_root_element(selectors, html_element)
+
+
+def match_selectors_against_html_resource(selectors, html_resource):
+    '''
+    Find the selectors that match with the DOM from the given HTML.
+
+    @param selectors set of CSS selectors
+    @param html_resource HTML file path/url or file(-like) object.
+
+    @return set of found selectors
+    '''
+    parser = lxml.etree.HTMLParser()
+    html_element = lxml.etree.parse(html_resource, parser=parser).getroot()
+    return match_selectors_against_html_root_element(selectors, html_element)
+
 
 
 # Some precompiled regexes to extract ids and clasess from CSS selectors.
@@ -188,7 +197,7 @@ class CssDeadwoodApp(object):
         for html_file in html_files:
             original_total = len(unused_selectors)
             _log.debug('DOM matching %d CSS selectors with DOM from %r' % (original_total, html_file))
-            found_selectors = match_selectors_against_html_file(unused_selectors, html_file)
+            found_selectors = match_selectors_against_html_resource(unused_selectors, html_file)
             unused_selectors.difference_update(found_selectors)
             _log.info('DOM matching %d CSS selectors: %d matches, %d unmatched with DOM from %r' % (original_total, len(found_selectors), len(unused_selectors), html_file))
 

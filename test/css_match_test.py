@@ -16,15 +16,15 @@ class CssMatchTest(unittest.TestCase):
         html = '<html><head></head><body><p>hello world</p></body></html>'
 
         selectors = set(['p'])
-        result = cssdeadwood.match_selectors_against_html(selectors, html)
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
         self.assertEqual(result, set(['p']))
 
         selectors = set(['div'])
-        result = cssdeadwood.match_selectors_against_html(selectors, html)
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
         self.assertEqual(result, set([]))
 
         selectors = set(['p', 'div'])
-        result = cssdeadwood.match_selectors_against_html(selectors, html)
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
         self.assertEqual(result, set(['p']))
 
 
@@ -32,16 +32,16 @@ class CssMatchTest(unittest.TestCase):
         html = '<html><head></head><body><p>hello <a href="/world">world</a></p></body></html>'
 
         selectors = set(['a', 'a:hover'])
-        result = cssdeadwood.match_selectors_against_html(selectors, html)
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
         self.assertEqual(result, set(['a', 'a:hover']))
 
     def testDirectChilds(self):
         html = '<html><head></head><body><p>hello <a href="/world">world</a></p></body></html>'
 
         selectors = set(['p > a', 'p a'])
-        result = cssdeadwood.match_selectors_against_html(selectors, html)
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
         self.assertEqual(result, set(['p > a', 'p a']))
 
         selectors = set(['p>a', 'p a'])
-        result = cssdeadwood.match_selectors_against_html(selectors, html)
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
         self.assertEqual(result, set(['p>a', 'p a']))
