@@ -28,12 +28,29 @@ class CssMatchTest(unittest.TestCase):
         self.assertEqual(result, set(['p']))
 
 
-    def testHoverPseudoClasses(self):
+    def testPseudoClasses(self):
         html = '<html><head></head><body><p>hello <a href="/world">world</a></p></body></html>'
 
-        selectors = set(['a', 'a:hover'])
+        selectors = set(['a', 'p:hover', 'h4:hover'])
         result = cssdeadwood.match_selectors_against_html_string(selectors, html)
-        self.assertEqual(result, set(['a', 'a:hover']))
+        self.assertEqual(result, set(['a', 'p:hover']))
+
+        selectors = set(['a:focus', 'a:visited'])
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
+        self.assertEqual(result, set(['a:visited', 'a:focus']))
+
+
+    def testPseudoChildSelectors(self):
+        html = '<html><head></head><body><ol><li>one</li></ol><ul></ul></body></html>'
+
+        selectors = set(['ol li:first-child'])
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
+        self.assertEqual(result, set(['ol li:first-child']))
+
+        selectors = set(['ul li:first-child'])
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
+        self.assertEqual(result, set())
+
 
     def testDirectChilds(self):
         html = '<html><head></head><body><p>hello <a href="/world">world</a></p></body></html>'
@@ -45,3 +62,5 @@ class CssMatchTest(unittest.TestCase):
         selectors = set(['p>a', 'p a'])
         result = cssdeadwood.match_selectors_against_html_string(selectors, html)
         self.assertEqual(result, set(['p>a', 'p a']))
+
+

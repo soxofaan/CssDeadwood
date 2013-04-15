@@ -101,6 +101,27 @@ def get_occuring_words(words, content):
     return found
 
 
+class CssDeadwoodHtmlTranslator(cssselect.HTMLTranslator):
+    '''
+    Simple extension of cssselect.HTMLTranslator to make sure that
+    pseudo classes like :hover, :focus, :visited, etc always match,
+    which is what we want in a dead code detection app.
+    '''
+
+    def pseudo_always_matches(self, xpath):
+        """Common implementation for pseudo-classes that alwyas match."""
+        return xpath
+
+    xpath_link_pseudo = pseudo_always_matches
+    xpath_visited_pseudo = pseudo_always_matches
+    xpath_hover_pseudo = pseudo_always_matches
+    xpath_active_pseudo = pseudo_always_matches
+    xpath_focus_pseudo = pseudo_always_matches
+    xpath_target_pseudo = pseudo_always_matches
+    xpath_enabled_pseudo = pseudo_always_matches
+    xpath_disabled_pseudo = pseudo_always_matches
+    xpath_checked_pseudo = pseudo_always_matches
+
 
 def match_selectors_against_html_root_element(selectors, html_element):
     '''
@@ -112,7 +133,7 @@ def match_selectors_against_html_root_element(selectors, html_element):
     @return set of found selectors
     '''
     found_selectors = set()
-    css_to_xpath_translator = cssselect.HTMLTranslator()
+    css_to_xpath_translator = CssDeadwoodHtmlTranslator()
     for selector in selectors:
         try:
             xpath_expr = css_to_xpath_translator.css_to_xpath(selector)
