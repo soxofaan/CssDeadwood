@@ -111,6 +111,7 @@ def get_matching_selectors_in_dom(selectors, html_file):
 
     @return set
     '''
+    logger = logging.getLogger('CssDeadwood.bs4')
     # TODO: (from http://www.crummy.com/software/BeautifulSoup/bs4/doc/)
     # if CSS selectors are all you need, you might as well use lxml directly, because it's faster.
     with open(html_file) as f:
@@ -121,8 +122,12 @@ def get_matching_selectors_in_dom(selectors, html_file):
         try:
             if len(soup.select(selector)) > 0:
                 found_selectors.add(selector)
+        except IndexError:
+            # This often happens with overspecified id selectors
+            # see https://bugs.launchpad.net/beautifulsoup/+bug/1168167
+            logger.warning('BeautifulSoup select failed with IndexError on selector %r' % selector)
         except Exception:
-            logging.exception('BeautifulSoup select failed on selector %r' % selector)
+            logger.exception('BeautifulSoup select failed on selector %r' % selector)
     return found_selectors
 
 
@@ -257,6 +262,7 @@ class CssDeadwoodApp(object):
 
         # Set up logging
         logging.basicConfig(level=options.loglevel)
+        logging.getLogger('CssDeadwood.bs4').setLevel(logging.ERROR)
 
         # Get CSS, HTML and other source files form given arguments.
         css_files = collect_files(args, extensions=['.css'])
