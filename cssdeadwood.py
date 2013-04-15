@@ -99,23 +99,20 @@ def get_occuring_words(words, content):
 
 
 
-
-
-def get_matching_selectors_in_dom(selectors, html_file):
+def match_selectors_against_html(selectors, html):
     '''
-    Try the given set of CSS selectors on the DOM defined
-    by the HTML file and return the subset of selectors that did match.
+    Try the given set of CSS selectors on the DOM from the given HTML
+    and return the subset of selectors that did match.
 
     @param selectors set of CSS selectors
-    @param html_file path to HTML file.
+    @param html html string or file like object, containing html data
 
-    @return set
+    @return set of found selectors
     '''
     logger = logging.getLogger('CssDeadwood.bs4')
     # TODO: (from http://www.crummy.com/software/BeautifulSoup/bs4/doc/)
     # if CSS selectors are all you need, you might as well use lxml directly, because it's faster.
-    with open(html_file) as f:
-        soup = bs4.BeautifulSoup(f)
+    soup = bs4.BeautifulSoup(html)
 
     found_selectors = set()
     for selector in selectors:
@@ -128,6 +125,21 @@ def get_matching_selectors_in_dom(selectors, html_file):
             logger.warning('BeautifulSoup select failed with IndexError on selector %r' % selector)
         except Exception:
             logger.exception('BeautifulSoup select failed on selector %r' % selector)
+    return found_selectors
+
+
+def match_selectors_against_html_file(selectors, html_file):
+    '''
+    Try the given set of CSS selectors on the DOM from the given HTML
+    and return the subset of selectors that did match.
+
+    @param selectors set of CSS selectors
+    @param html_file path to HTML file.
+
+    @return set of found selectors
+    '''
+    with open(html_file) as f:
+        found_selectors = match_selectors_against_html(selectors, f)
     return found_selectors
 
 
@@ -176,7 +188,7 @@ class CssDeadwoodApp(object):
         for html_file in html_files:
             original_total = len(unused_selectors)
             _log.debug('DOM matching %d CSS selectors with DOM from %r' % (original_total, html_file))
-            found_selectors = get_matching_selectors_in_dom(unused_selectors, html_file)
+            found_selectors = match_selectors_against_html_file(unused_selectors, html_file)
             unused_selectors.difference_update(found_selectors)
             _log.info('DOM matching %d CSS selectors: %d matches, %d unmatched with DOM from %r' % (original_total, len(found_selectors), len(unused_selectors), html_file))
 
