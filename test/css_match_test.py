@@ -64,3 +64,24 @@ class CssMatchTest(unittest.TestCase):
         self.assertEqual(result, set(['p>a', 'p a']))
 
 
+    def testPseudoElements(self):
+        html = '<html><head></head><body><p>hello <a href="/world">world</a></p></body></html>'
+
+        selectors = set(['p:before'])
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
+        self.assertEqual(result, set(['p:before']))
+
+        selectors = set(['p:after'])
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
+        self.assertEqual(result, set(['p:after']))
+
+        selectors = set(['p:first-line'])
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
+        self.assertEqual(result, set(['p:first-line']))
+
+        selectors = set(['p:first-letter'])
+        result = cssdeadwood.match_selectors_against_html_string(selectors, html)
+        self.assertEqual(result, set(['p:first-letter']))
+
+
+

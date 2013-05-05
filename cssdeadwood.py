@@ -127,20 +127,26 @@ def match_selectors_against_html_root_element(selectors, html_element):
     '''
     Find the selectors that match with the DOM from the given HTML.
 
-    @param selectors set of CSS selectors
+    @param selectors set of CSS selectors (strings)
     @param html_element lxml.etree.Element object
 
     @return set of found selectors
     '''
     found_selectors = set()
     css_to_xpath_translator = CssDeadwoodHtmlTranslator()
-    for selector in selectors:
+    for selector_str in selectors:
         try:
-            xpath_expr = css_to_xpath_translator.css_to_xpath(selector)
-            if len(html_element.xpath(xpath_expr)) > 0:
-                found_selectors.add(selector)
+            # Instead of just calling css_to_xpath(selector_str),
+            # we first convert the css selector string to a cssselect.Selector instance
+            # to pass to selector_to_xpath(), so we can properly ignore pseudo elements.
+            # Note that cssselect.parse() always returns a list, so we do a for loop.
+            for selector in cssselect.parse(selector_str):
+                selector.pseudo_element = None
+                xpath_expr = css_to_xpath_translator.selector_to_xpath(selector)
+                if len(html_element.xpath(xpath_expr)) > 0:
+                    found_selectors.add(selector_str)
         except Exception:
-            logging.exception('lxml css select failed on selector %r' % selector)
+            logging.exception('lxml css select failed on selector %r' % selector_str)
     return found_selectors
 
 
@@ -148,7 +154,7 @@ def match_selectors_against_html_string(selectors, html_string):
     '''
     Find the selectors that match with the DOM from the given HTML.
 
-    @param selectors set of CSS selectors
+    @param selectors set of CSS selectors (strings)
     @param html_string html string
 
     @return set of found selectors
@@ -162,7 +168,7 @@ def match_selectors_against_html_resource(selectors, html_resource):
     '''
     Find the selectors that match with the DOM from the given HTML.
 
-    @param selectors set of CSS selectors
+    @param selectors set of CSS selectors (strings)
     @param html_resource HTML file path/url or file(-like) object.
 
     @return set of found selectors
