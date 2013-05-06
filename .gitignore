@@ -1,2 +1,5 @@
 *.pyc
 tmp*
+MANIFEST
+dist
+*.egg-info

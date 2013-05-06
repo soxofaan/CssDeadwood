@@ -2,209 +2,30 @@
 
 
 import sys
-import os
-import re
-import collections
-import operator
 import logging
 import optparse
 import json
-import pprint
 
 import lxml
 import lxml.etree
 import lxml.cssselect
 import cssselect
 
+from cssdeadwood.utils import collect_files, file_get_contents, get_occuring_words
+from cssdeadwood.css_extract import extract_css_selectors, extract_ids_and_classes_from_selectors
+from cssdeadwood.dom_match import match_selectors_against_html_resource
+
 
 # TODO: instead of used vs not used, provide histogram analysis to have better view on hot vs not hot
 # TODO: source id/class based elimination: only do search on strings, not logic
 # TODO: operation mode to only provide HTML files
 # TODO: operation mode to only provide urls
+# TODO: HTML format reporting
 
 
-_log = logging.getLogger()
+_log = logging.getLogger('cssdeadwood')
 
 
-
-def collect_files(seeds, extensions=None):
-    '''
-    Collect files from given seeds: files or folders to scan through recursively.
-
-    @param seeds list of root folders or files
-    @param extensions optional list of file extensions (lowercase) to filter files
-    '''
-    files = set()
-
-    # Local function to check extensions (or accept everything)
-    if extensions is not None:
-        check_extension = lambda path: os.path.splitext(path)[1].lower() in extensions
-    else:
-        check_extension = lambda path: True
-
-    for seed in seeds:
-        if os.path.isfile(seed) and check_extension(seed):
-            files.add(seed)
-        elif os.path.isdir(seed):
-            for (dirpath, dirnames, filenames) in os.walk(seed):
-                for filename in filenames:
-                    path = os.path.join(dirpath, filename)
-                    if check_extension(path):
-                        files.add(path)
-    return files
-
-
-def extract_css_selectors(css_file):
-    '''
-    Extract CSS selectors from a given CSS file.
-
-    @param css_file CSS file path
-
-    @return set of CSS selectors
-    '''
-    selectors = set()
-    css = file_get_contents(css_file)
-    # Precompiled regex to clean up/normalize whitespace
-    whitespace_regex = re.compile(r'\s+', flags=re.DOTALL)
-    # Remove comments.
-    css = re.compile(r'/\*.*?\*/', flags=re.DOTALL).sub('', css)
-    # Collect the selectors/selector groups in front of { ... } declaration blocks
-    for match in re.compile(r'\s*([^{}]*)\s*{', flags=re.DOTALL).finditer(css):
-        selector_part = match.group(1).strip()
-        # Ignore at-rules
-        if selector_part.startswith('@'):
-            continue
-        # Split on comma to get selectors.
-        for selector_candidate in selector_part.split(','):
-            # Clean up/normalize whitespace
-            selector_candidate = whitespace_regex.sub(' ', selector_candidate.strip())
-            # Store
-            selectors.add(selector_candidate)
-
-    return selectors
-
-
-def file_get_contents(file_name):
-    with open(file_name) as f:
-        contents = f.read()
-    return contents
-
-
-def get_occuring_words(words, content):
-    '''
-    Return the subset of given words that occur in content.
-    '''
-    found = set()
-    for word in words:
-        if re.search(r'\b%s\b' % word, content):
-            found.add(word)
-    return found
-
-
-class CssDeadwoodHtmlTranslator(cssselect.HTMLTranslator):
-    '''
-    Simple extension of cssselect.HTMLTranslator to make sure that
-    pseudo classes like :hover, :focus, :visited, etc always match,
-    which is what we want in a dead code detection app.
-    '''
-
-    def pseudo_always_matches(self, xpath):
-        """Common implementation for pseudo-classes that alwyas match."""
-        return xpath
-
-    xpath_link_pseudo = pseudo_always_matches
-    xpath_visited_pseudo = pseudo_always_matches
-    xpath_hover_pseudo = pseudo_always_matches
-    xpath_active_pseudo = pseudo_always_matches
-    xpath_focus_pseudo = pseudo_always_matches
-    xpath_target_pseudo = pseudo_always_matches
-    xpath_enabled_pseudo = pseudo_always_matches
-    xpath_disabled_pseudo = pseudo_always_matches
-    xpath_checked_pseudo = pseudo_always_matches
-
-
-def match_selectors_against_html_root_element(selectors, html_element):
-    '''
-    Find the selectors that match with the DOM from the given HTML.
-
-    @param selectors set of CSS selectors (strings)
-    @param html_element lxml.etree.Element object
-
-    @return set of found selectors
-    '''
-    found_selectors = set()
-    css_to_xpath_translator = CssDeadwoodHtmlTranslator()
-    for selector_str in selectors:
-        try:
-            # Instead of just calling css_to_xpath(selector_str),
-            # we first convert the css selector string to a cssselect.Selector instance
-            # to pass to selector_to_xpath(), so we can properly ignore pseudo elements.
-            # Note that cssselect.parse() always returns a list, so we do a for loop.
-            for selector in cssselect.parse(selector_str):
-                selector.pseudo_element = None
-                xpath_expr = css_to_xpath_translator.selector_to_xpath(selector)
-                if len(html_element.xpath(xpath_expr)) > 0:
-                    found_selectors.add(selector_str)
-        except Exception:
-            logging.exception('lxml css select failed on selector %r' % selector_str)
-    return found_selectors
-
-
-def match_selectors_against_html_string(selectors, html_string):
-    '''
-    Find the selectors that match with the DOM from the given HTML.
-
-    @param selectors set of CSS selectors (strings)
-    @param html_string html string
-
-    @return set of found selectors
-    '''
-    parser = lxml.etree.HTMLParser()
-    html_element = lxml.etree.fromstring(html_string, parser=parser)
-    return match_selectors_against_html_root_element(selectors, html_element)
-
-
-def match_selectors_against_html_resource(selectors, html_resource):
-    '''
-    Find the selectors that match with the DOM from the given HTML.
-
-    @param selectors set of CSS selectors (strings)
-    @param html_resource HTML file path/url or file(-like) object.
-
-    @return set of found selectors
-    '''
-    parser = lxml.etree.HTMLParser()
-    html_element = lxml.etree.parse(html_resource, parser=parser).getroot()
-    return match_selectors_against_html_root_element(selectors, html_element)
-
-
-
-# Some precompiled regexes to extract ids and clasess from CSS selectors.
-REGEX_ID = re.compile(r'\#([a-zA-Z0-9]+)')
-REGEX_CLASS = re.compile(r'\.([a-zA-Z0-9]+)')
-
-
-def extract_ids_and_classes_from_selectors(selectors):
-    '''
-    Extract ids and classes used in the given CSS selectors.
-
-    @return (ids, classes, origins) with:
-        ids: set of extracted ids
-        classes: set of extracted classes
-        origins: mapping of ids (format '#x') and classes (format '.x')
-            to list of selectors they were found in.
-    '''
-    ids = set()
-    classes = set()
-    origins = collections.defaultdict(lambda: [])
-    for selector in selectors:
-        for id in REGEX_ID.findall(selector):
-            ids.add(id)
-            origins['#' + id].append(selector)
-        for classs in REGEX_CLASS.findall(selector):
-            classes.add(classs)
-            origins['.' + classs].append(selector)
-    return (ids, classes, origins)
 
 
 
@@ -377,7 +198,6 @@ class CssDeadwoodApp(object):
 
 
 
-
-
-if __name__ == '__main__':
+def main():
     CssDeadwoodApp().main(sys.argv)
+

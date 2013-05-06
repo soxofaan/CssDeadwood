@@ -5,8 +5,8 @@ import tempfile
 import unittest
 
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-import cssdeadwood
+
+from cssdeadwood.css_extract import extract_css_selectors
 
 
 class CssExtractTest(unittest.TestCase):
@@ -20,7 +20,7 @@ class CssExtractTest(unittest.TestCase):
     def assertSelectorExtraction(self, css_data, selectors):
         self.cssfile.write(css_data)
         self.cssfile.close()
-        extracted = cssdeadwood.extract_css_selectors(self.cssfile.name)
+        extracted = extract_css_selectors(self.cssfile.name)
         self.assertEqual(extracted, selectors)
 
 
