@@ -8,12 +8,16 @@ except ImportError:
 
 setup(
     name='CssDeadwood',
-    version='0.2.4',
+    version='0.2.5',
     author='Stefaan Lippens',
     author_email='soxofaan@gmail.com',
     url='https://github.com/soxofaan/CssDeadwood/',
     packages=['cssdeadwood', 'cssdeadwood.test'],
-    scripts=['bin/cssdeadwood'],
+    entry_points={
+        'console_scripts': [
+            'cssdeadwood = cssdeadwood.app:main',
+        ],
+    },
     license='MIT',
     keywords="css deadcode",
     description='Tool to search for unused CSS selectors.',

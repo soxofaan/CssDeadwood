@@ -1,6 +1,0 @@
-#!/usr/bin/env python
-
-import cssdeadwood.app
-
-if __name__ == '__main__':
-    cssdeadwood.app.main()
