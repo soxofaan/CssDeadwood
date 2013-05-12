@@ -16,7 +16,9 @@ from cssdeadwood.dom_match import match_selectors_against_html_resource
 # TODO: source id/class based elimination: only do search on strings, not logic
 # TODO: operation mode to only provide HTML file(s) (and analyse referenced CSS files)
 # TODO: operation mode to only provide url(s) (and analyse referenced CSS files)
-# TODO: HTML format reporting
+# TODO: HTML format reporting?
+# TODO: TAP format reporting?
+# TODO: Junit format reporting?
 
 
 _log = logging.getLogger('cssdeadwood')
