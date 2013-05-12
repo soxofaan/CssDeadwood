@@ -110,24 +110,34 @@ class CssDeadwoodApp(object):
         option_parser = optparse.OptionParser(usage='%prog [options] [cssfiles] [htmlfiles] [srcsfiles]')
 
         default_src_extensions = '.php,.py,.rb,.js'
-        option_parser.add_option("-e", "--srcext", metavar='EXT',
-                      action="store", dest="src_extensions", default=default_src_extensions,
-                      help="Define the source file extensions (comma separated) to filter on when recursively scanning source folders. Default: '%s'." % default_src_extensions)
+        option_parser.add_option(
+            "-e", "--srcext", metavar='EXT',
+            action="store", dest="src_extensions", default=default_src_extensions,
+            help="Define the source file extensions (comma separated) to filter on when recursively scanning source folders. Default: '%s'." % default_src_extensions
+        )
 
-        option_parser.add_option("--htmlexport", metavar='FILE',
-                      action="store", dest="html_export", default=None,
-                      help="Export result to a HTML report (requires jinja2 library).")
-        option_parser.add_option("--jsonexport", metavar='FILE',
-                      action="store", dest="json_export", default=None,
-                      help="Export analysis results in JSON format.")
+        # option_parser.add_option(
+        #     "--htmlexport", metavar='FILE',
+        #     action="store", dest="html_export", default=None,
+        #     help="Export result to a HTML report (requires jinja2 library)."
+        # )
+        option_parser.add_option(
+            "--jsonexport", metavar='FILE',
+            action="store", dest="json_export", default=None,
+            help="Export analysis results in JSON format."
+        )
 
-        option_parser.add_option("-v", "--verbose",
-                      action="store_const", dest="loglevel", const=logging.DEBUG, default=logging.INFO,
-                      help="Be more verbose")
+        option_parser.add_option(
+            "-v", "--verbose",
+            action="store_const", dest="loglevel", const=logging.DEBUG, default=logging.INFO,
+            help="Be more verbose (show debug log messages)"
+        )
 
-        option_parser.add_option("--example",
+        option_parser.add_option(
+            "--example",
             action="store_true", dest="example_mode", default=False,
-            help="Run CssDeadwood in example mode.")
+            help="Run CssDeadwood in example mode."
+        )
 
         options, args = option_parser.parse_args(args=argv[1:])
 
