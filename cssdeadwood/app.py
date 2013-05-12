@@ -132,6 +132,11 @@ class CssDeadwoodApp(object):
             action="store_const", dest="loglevel", const=logging.DEBUG, default=logging.INFO,
             help="Be more verbose (show debug log messages)"
         )
+        option_parser.add_option(
+            "-q", "--quiet",
+            action="store_const", dest="loglevel", const=logging.WARNING, default=logging.INFO,
+            help="Be less verbose (show only warning log messages"
+        )
 
         option_parser.add_option(
             "--example",
@@ -151,7 +156,8 @@ class CssDeadwoodApp(object):
             print css_file
             print html_file
             print '-' * 80
-            argv = [argv[0]] + [css_file, html_file] + [a for a in argv if a in ['-v', '--verbose']]
+            print
+            argv = [argv[0]] + [css_file, html_file] + [a for a in argv if a in ['-v', '--verbose', '-q', '--quiet']]
             return self.main(argv=argv)
 
         # Set up logging
@@ -210,7 +216,7 @@ class CssDeadwoodApp(object):
                 continue
             unused_count = len(data['unused_selectors'])
             perc = 100.0 * unused_count / total_count
-            print 'Could not determine usage of the following %d CSS selectors (from %d in total: %.2f%%):' % (unused_count, total_count, perc)
+            print 'Could not determine usage of the following %d CSS selectors (from %d in total: %.1f%%):' % (unused_count, total_count, perc)
             print '\n'.join(data['unused_selectors'])
 
         # TODO: HTML report
