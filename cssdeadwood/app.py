@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 
-
+import os
 import sys
 import logging
 import optparse
 import json
 
-import lxml
-import lxml.etree
-import lxml.cssselect
-import cssselect
 
 from cssdeadwood.utils import collect_files, file_get_contents, get_occuring_words
 from cssdeadwood.css_extract import extract_css_selectors, extract_ids_and_classes_from_selectors
@@ -18,8 +14,8 @@ from cssdeadwood.dom_match import match_selectors_against_html_resource
 
 # TODO: instead of used vs not used, provide histogram analysis to have better view on hot vs not hot
 # TODO: source id/class based elimination: only do search on strings, not logic
-# TODO: operation mode to only provide HTML files
-# TODO: operation mode to only provide urls
+# TODO: operation mode to only provide HTML file(s) (and analyse referenced CSS files)
+# TODO: operation mode to only provide url(s) (and analyse referenced CSS files)
 # TODO: HTML format reporting
 
 
@@ -127,7 +123,24 @@ class CssDeadwoodApp(object):
                       action="store_const", dest="loglevel", const=logging.DEBUG, default=logging.INFO,
                       help="Be more verbose")
 
+        option_parser.add_option("--example",
+            action="store_true", dest="example_mode", default=False,
+            help="Run CssDeadwood in example mode.")
+
         options, args = option_parser.parse_args(args=argv[1:])
+
+        # Handle example mode
+        if options.example_mode:
+            # Rerun main() with these files as input:
+            css_file = os.path.join(os.path.dirname(__file__), 'test', 'files', 'css', 'css001.css')
+            html_file = os.path.join(os.path.dirname(__file__), 'test', 'files', 'html', 'html001.html')
+            print '-' * 80
+            print 'Running CssDeadwood in example mode with following CSS and HTML file as input:'
+            print css_file
+            print html_file
+            print '-' * 80
+            argv = [argv[0]] + [css_file, html_file] + [a for a in argv if a in ['-v', '--verbose']]
+            return self.main(argv=argv)
 
         # Set up logging
         logging.basicConfig(level=options.loglevel)
@@ -200,4 +213,9 @@ class CssDeadwoodApp(object):
 
 def main():
     CssDeadwoodApp().main(sys.argv)
+
+
+if __name__ == '__main__':
+    main()
+
 
