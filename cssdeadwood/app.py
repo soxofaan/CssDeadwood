@@ -141,7 +141,7 @@ class CssDeadwoodApp(object):
         option_parser.add_option(
             "--example",
             action="store_true", dest="example_mode", default=False,
-            help="Run CssDeadwood in example mode."
+            help="Run CSS Deadwood in example mode."
         )
 
         options, args = option_parser.parse_args(args=argv[1:])
@@ -152,7 +152,7 @@ class CssDeadwoodApp(object):
             css_file = os.path.join(os.path.dirname(__file__), 'test', 'files', 'css', 'css001.css')
             html_file = os.path.join(os.path.dirname(__file__), 'test', 'files', 'html', 'html001.html')
             print '-' * 80
-            print 'Running CssDeadwood in example mode with following CSS and HTML file as input:'
+            print 'Running CSS Deadwood in example mode with following CSS and HTML file as input:'
             print css_file
             print html_file
             print '-' * 80
@@ -172,6 +172,7 @@ class CssDeadwoodApp(object):
         else:
             src_extensions = []
         src_files = collect_files(args, extensions=src_extensions)
+        # TODO: use the right plural forms here
         _log.info('Working with %d CSS files.' % len(css_files))
         _log.debug('CSS files: %r.' % css_files)
         _log.info('Working with %d HTML files.' % len(html_files))
