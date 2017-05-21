@@ -151,12 +151,12 @@ class CssDeadwoodApp(object):
             # Rerun main() with these files as input:
             css_file = os.path.join(os.path.dirname(__file__), 'test', 'files', 'css', 'css001.css')
             html_file = os.path.join(os.path.dirname(__file__), 'test', 'files', 'html', 'html001.html')
-            print '-' * 80
-            print 'Running CSS Deadwood in example mode with following CSS and HTML file as input:'
-            print css_file
-            print html_file
-            print '-' * 80
-            print
+            print('-' * 80)
+            print('Running CSS Deadwood in example mode with following CSS and HTML file as input:')
+            print(css_file)
+            print(html_file)
+            print('-' * 80)
+            print()
             argv = [argv[0]] + [css_file, html_file] + [a for a in argv if a in ['-v', '--verbose', '-q', '--quiet']]
             return self.main(argv=argv)
 
@@ -209,16 +209,16 @@ class CssDeadwoodApp(object):
             results[css_file]['unused_selectors'] = sorted(unused_selectors)
 
         # Report
-        for css_file, data in results.items():
-            print (css_file + ' ').ljust(80, '-')
+        for css_file, data in list(results.items()):
+            print((css_file + ' ').ljust(80, '-'))
             total_count = len(data['selectors'])
             if total_count == 0:
-                print 'No selectors'
+                print('No selectors')
                 continue
             unused_count = len(data['unused_selectors'])
             perc = 100.0 * unused_count / total_count
-            print 'Could not determine usage of the following %d CSS selectors (from %d in total: %.1f%%):' % (unused_count, total_count, perc)
-            print '\n'.join(data['unused_selectors'])
+            print('Could not determine usage of the following %d CSS selectors (from %d in total: %.1f%%):' % (unused_count, total_count, perc))
+            print('\n'.join(data['unused_selectors']))
 
         # TODO: HTML report
 
