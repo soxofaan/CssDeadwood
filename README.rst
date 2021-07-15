@@ -2,10 +2,10 @@
 CSS Deadwood
 ============
 
-.. image:: https://img.shields.io/github/workflow/status/soxofaan/CssDeadwood/Lint%20and%20Test
-
+.. image:: https://img.shields.io/pypi/pyversions/CssDeadwood
+.. image:: https://img.shields.io/pypi/wheel/CssDeadwood
 .. image:: https://img.shields.io/github/license/soxofaan/CssDeadwood
-
+.. image:: https://img.shields.io/github/workflow/status/soxofaan/CssDeadwood/Lint%20and%20Test
 
 
 CSS Deadwood is a tool to search for unused CSS selectors
