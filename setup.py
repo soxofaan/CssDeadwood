@@ -8,7 +8,7 @@ except ImportError:
 
 setup(
     name='CssDeadwood',
-    version='0.3.0a1',
+    version='0.3.0',
     author='Stefaan Lippens',
     author_email='soxofaan@gmail.com',
     url='https://github.com/soxofaan/CssDeadwood/',
