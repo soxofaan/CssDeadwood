@@ -3,9 +3,20 @@ CSS Deadwood
 ============
 
 .. image:: https://img.shields.io/pypi/pyversions/CssDeadwood
+    :target: https://pypi.org/project/CssDeadwood/
+
 .. image:: https://img.shields.io/pypi/wheel/CssDeadwood
+    :target: https://pypi.org/project/CssDeadwood/
+
+.. image::  https://img.shields.io/pypi/v/dahuffman
+    :target: https://pypi.org/project/CssDeadwood
+
 .. image:: https://img.shields.io/github/license/soxofaan/CssDeadwood
+    :target: https://github.com/soxofaan/CssDeadwood/blob/develop/LICENCE.txt
+
 .. image:: https://img.shields.io/github/workflow/status/soxofaan/CssDeadwood/Lint%20and%20Test
+    :target: https://github.com/soxofaan/CssDeadwood/actions/workflows/lint-and-test.yml
+
 
 
 CSS Deadwood is a tool to search for unused CSS selectors
