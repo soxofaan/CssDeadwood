@@ -2,6 +2,11 @@
 CSS Deadwood
 ============
 
+.. image:: https://img.shields.io/github/workflow/status/soxofaan/CssDeadwood/Lint%20and%20Test
+
+.. image:: https://img.shields.io/github/license/soxofaan/CssDeadwood
+
+
 
 CSS Deadwood is a tool to search for unused CSS selectors
 by scanning given CSS files for CSS selectors and matching these against
