@@ -27,5 +27,11 @@ setup(
         "lxml >= 3.1.1",
         "cssselect >= 0.8",
     ],
-    test_suite='cssdeadwood.test'
+    test_suite='cssdeadwood.test',
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Environment :: Console",
+    ],
 )
